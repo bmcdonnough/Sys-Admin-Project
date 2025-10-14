@@ -6,9 +6,9 @@ sudo apt upgrade -y
 sudo apt install -y python3-pip python3-smbus i2c-tools python3-rpi.gpio git curl
 
 pip install --upgrade pip --break-system-packages
-pip install RPLCD --break-system-packages
-pip install pyotp --break-system-packages 
-pip install qrcode[pil] --break-system-packages
+sudo python3 -m pip install RPLCD --break-system-packages
+sudo python3 -m pip install pyotp --break-system-packages 
+sudo python3 -m pip install qrcode[pil] --break-system-packages
 
 sudo mkdir -p /etc/keypad_2fa
 sudo chmod 700 /etc/keypad_2fa
