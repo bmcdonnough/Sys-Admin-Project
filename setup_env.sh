@@ -9,6 +9,7 @@ pip install --upgrade pip --break-system-packages
 sudo python3 -m pip install RPLCD --break-system-packages
 sudo python3 -m pip install pyotp --break-system-packages 
 sudo python3 -m pip install qrcode[pil] --break-system-packages
+sudo python3 -m pip install pyqrcode --break-system-packages
 
 sudo mkdir -p /etc/keypad_2fa
 sudo chmod 700 /etc/keypad_2fa
