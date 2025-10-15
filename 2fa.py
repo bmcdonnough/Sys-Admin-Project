@@ -98,9 +98,7 @@ with open(secret_path, "r") as f:
     secret = f.read().strip()
 
 totp = pyotp.TOTP(secret, digits=6)
-print(f"{totp.now()}")
-next_code = totp.at(int(time.time()) + 30)
-print(f"{next_code}")
+
 
 # ===============================
 # Verification Loop (3 attempts)
@@ -113,8 +111,7 @@ try:
         code = get_keypad_input("Enter Duo Code:")
 
         lcd.clear()
-        print(f"Verifying with code: {code}")
-        if totp.verify(code, valid_window=2):
+        if totp.verify(code, valid_window=1):
             lcd.clear()
             lcd.write_string("✅ Access Granted")
             time.sleep(1.5)
