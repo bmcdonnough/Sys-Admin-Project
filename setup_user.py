@@ -1,52 +1,57 @@
-#!/usr/bin/env python3
 import os
 import pyotp
 import qrcode
 import getpass
 from pathlib import Path
-import pyqrcode
 
-# ===== Configuration =====
-ISSUER = "MyPiKeypadProject"
-SECRETS_DIR = Path("/etc/keypad_2fa")
+# ===============================
+# Detect the real user
+# ===============================
+USER = os.getenv("SUDO_USER") or getpass.getuser()
+SECRET_DIR = Path("/etc/keypad_2fa")
+SECRET_FILE = SECRET_DIR / f"{USER}.secret"
 
-# ===== Determine current user =====
-current_user = getpass.getuser()  # e.g. 'pi', 'ben', etc.
-print(f"Detected current user: {current_user}")
+# ===============================
+# Ensure directory exists
+# ===============================
+if not SECRET_DIR.exists():
+    print("🔐 Creating /etc/keypad_2fa directory...")
+    os.system("sudo mkdir -p /etc/keypad_2fa && sudo chmod 700 /etc/keypad_2fa && sudo chown root:root /etc/keypad_2fa")
 
-# ===== Ensure directory exists =====
-SECRETS_DIR.mkdir(parents=True, exist_ok=True)
+# ===============================
+# Check if user already has a secret
+# ===============================
+if SECRET_FILE.exists():
+    print(f"⚠️  A secret already exists for user '{USER}' at {SECRET_FILE}.")
+    overwrite = input("Do you want to overwrite it? (y/N): ").strip().lower()
+    if overwrite != "y":
+        print("❌ Cancelled. Keeping existing secret.")
+        exit(0)
 
-# ===== Determine user secret file =====
-secret_file = SECRETS_DIR / f"{current_user}.secret"
+# ===============================
+# Generate a new TOTP secret
+# ===============================
+secret = pyotp.random_base32()
+print(f"✅ Generated new TOTP secret for {USER}: {secret}")
 
-# ===== Generate or reuse secret =====
-if secret_file.exists():
-    print(f"Secret already exists for {current_user}. Reusing existing secret.")
-    secret = secret_file.read_text().strip()
-else:
-    secret = pyotp.random_base32()
-    secret_file.write_text(secret)
-    os.chmod(secret_file, 0o600)
-    print(f"Created new secret for {current_user} at {secret_file}")
+# Write secret securely
+os.system(f"echo '{secret}' | sudo tee {SECRET_FILE} > /dev/null")
+os.system(f"sudo chmod 600 {SECRET_FILE}")
 
-# ===== Create TOTP and provisioning URI =====
-totp = pyotp.TOTP(secret)
-uri = totp.provisioning_uri(name=current_user, issuer_name=ISSUER)
-qr = pyqrcode.create(uri)
-print("\nScan this QR code in Duo Mobile (or any authenticator):")
-print(qr.terminal())
+# ===============================
+# Generate provisioning URI and QR code
+# ===============================
+issuer_name = "RaspberryPi 2FA"
+uri = pyotp.totp.TOTP(secret).provisioning_uri(name=USER, issuer_name=issuer_name)
 
-# ===== Generate QR code image =====
-qr_filename = f"{current_user}_totp_qr.png"
-img = qrcode.make(uri)
-img.save(qr_filename)
-print(f"\nQR code saved as: {qr_filename}")
-print("You can open this image and scan it with Duo Mobile to register your account.")
+print("\n📱 Scan this QR code in Duo or Google Authenticator:")
+qr = qrcode.QRCode(border=2)
+qr.add_data(uri)
+qr.make(fit=True)
+qr.print_ascii(invert=True)
 
-# ===== Display info summary =====
-print("\nSummary:")
-print(f"  User: {current_user}")
-print(f"  Secret path: {secret_file}")
-print(f"  QR code file: {qr_filename}")
-print("Done ✅")
+print("\nOr add this manually:")
+print(uri)
+
+print("\n✅ Setup complete! You can now run your 2FA check with:")
+print(f"    sudo python3 /home/{USER}/SysAdminProject/2fa.py")
