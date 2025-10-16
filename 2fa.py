@@ -5,6 +5,13 @@ import pyotp
 import RPi.GPIO as GPIO
 from RPLCD.i2c import CharLCD
 from pathlib import Path
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--user", default=None)
+args, unknown = parser.parse_known_args()
+
+user = args.user or os.getenv("SUDO_USER") or os.getenv("USER") or os.getlogin()
 
 # ===============================
 # LCD Configuration (adjust as needed)
@@ -84,7 +91,7 @@ def get_keypad_input(prompt="Enter Code:", code_length=6):
 # ===============================
 # User + TOTP Setup
 # ===============================
-USER = os.getenv("SUDO_USER") or os.getenv("USER") or os.getlogin()
+USER = os.getenv("SUDO_USER") or os.getlogin() or os.getenv("USER")
 secret_path = Path(f"/etc/keypad_2fa/{USER}.secret")
 
 if not secret_path.exists():
