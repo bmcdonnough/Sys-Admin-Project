@@ -11,7 +11,7 @@ $REAL_SUDO apt update -y
 $REAL_SUDO apt install -y python3 python3-pip git i2c-tools python3-smbus acl
 
 echo "=== Installing Python packages ==="
-pip3 install --upgrade RPLCD pyotp
+pip3 install --upgrade RPLCD pyotp pyqrcode qrcode --break-system-packages
 
 echo "=== Enabling I2C and GPIO access ==="
 $REAL_SUDO raspi-config nonint do_i2c 0 || true
