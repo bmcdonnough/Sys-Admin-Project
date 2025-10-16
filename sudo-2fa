@@ -1,0 +1,27 @@
+  GNU nano 8.4                                                                                     sudo-2fa *                                                                                            
+#!/bin/bash
+unalias sudo 2>/dev/null
+
+PY_SCRIPT="/home/pi/SysadminProject/2fa.py"
+USER_NAME="$(whoami)"
+CACHE_FILE="/tmp/2fa-${USER_NAME}"
+TIMEOUT=900
+
+check_cache() {
+        if [ -f "$CACHE_FILE" ]; then
+                last_run=$(stat -c %Y "$CACHE_FILE" 2>/dev/null)
+                now=$(date +%s)
+                if (( now - last_run < TIMEOUT )); then
+                        return 0
+                fi
+        fi
+        return 1
+}
+
+if ! check_cache; then
+        /usr/bin/python3 "$PY_SCRIPT" || exit 1
+        touch "$CACHE_FILE"
+fi
+
+/usr/bin/sudo "$@"
+
