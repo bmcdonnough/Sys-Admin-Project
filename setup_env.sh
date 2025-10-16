@@ -8,7 +8,7 @@ REAL_SUDO="/usr/bin/sudo"
 
 echo "=== Installing dependencies ==="
 $REAL_SUDO apt update -y
-$REAL_SUDO install -y python3 python3-pip git i2c-tools python3-smbus acl
+$REAL_SUDO apt install -y python3 python3-pip git i2c-tools python3-smbus acl
 
 echo "=== Installing Python packages ==="
 pip3 install --upgrade RPLCD pyotp
