@@ -56,6 +56,7 @@ BASHRC="/home/$USER_NAME/.bashrc"
 if ! grep -q "sudo-2fa" "$BASHRC"; then
     echo "alias sudo='/usr/local/bin/sudo-2fa'" >> "$BASHRC"
     chown "$USER_NAME":"$USER_NAME" "$BASHRC"
+fi
 
 echo "=== Final verification ==="
 groups "$USER_NAME" | grep -E "i2c|gpio" >/dev/null || echo "⚠️  Add user to i2c/gpio groups manually."
