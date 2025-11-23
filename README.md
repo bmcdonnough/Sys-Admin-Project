@@ -95,6 +95,7 @@ If you prefer manual installation:
 
 4. **Set up 2FA secret:**
    ```bash
+   cd /home/pi/SysAdminProject
    python3 setup_user.py
    ```
    Scan the QR code with your authenticator app.
@@ -187,9 +188,13 @@ MAX_ATTEMPTS = 3  # Change number of allowed attempts
 - Verify pins are not in use by other services
 - Test with `gpio readall` command
 
+### Script path errors
+- Note: There is an inconsistency in the original project files where `setup_env.sh` uses `/home/pi/SysAdminProject` but `sudo-2fa` uses `/home/pi/SysadminProject`
+- If you encounter "file not found" errors, check which directory name was created and update the path in `sudo-2fa` line 5 accordingly
+
 ## Security Considerations
 
-- TOTP secrets are stored in `/etc/keypad_2fa/` with restricted permissions (600)
+- TOTP secrets are stored in `/etc/keypad_2fa/` with restricted permissions (640, owned by user:root)
 - Each user has their own secret file
 - Session cache files are stored in `/tmp/` and expire after 15 minutes
 - The system provides hardware-based 2FA, adding physical security to authentication
